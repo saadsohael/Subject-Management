@@ -1,0 +1,213 @@
+WindowManager:
+    HomeScreen:
+    ConfirmationWindow:
+    AdminDash:
+    AddRecordWindow:
+    StudentDataWindow:
+    ShowAllStudentsWindow:
+    StudentDash:
+    ChangeDeptChoiceWindow:
+
+<HomeScreen>:
+    name: 'HomeScreen'
+
+<ConfirmationWindow>:
+    name: 'ConfirmationWindow'
+
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 250
+
+        GridLayout:
+            cols : 1
+            rows : 2
+
+            Label:
+                id : confirm_label
+                text_size: self.size
+                halign: "center"
+                valign: "middle"
+                font_size: 0.04 * root.width
+
+            GridLayout:
+                cols : 2
+                rows : 1
+
+                spacing: 50
+                size_hint: 1,0.2
+
+                Button:
+                    text: 'Yes'
+                    text_size: self.size
+                    halign: 'center'
+                    valign: 'middle'
+                    on_release:
+                        root.confirm_btn()
+
+                Button:
+                    text: 'Go Back'
+                    text_size: self.size
+                    halign: 'center'
+                    valign: 'middle'
+                    on_release:
+                        root.prev_window = 'AdminDash'
+                        root.back_button()
+
+<AdminDash>:
+    name : 'AdminDash'
+    BoxLayout:
+        orientation : 'vertical'
+        size_hint : 0.5,0.7
+        padding : 15
+        pos_hint: {'x':0.25, 'y': 0.15}
+
+        GridLayout:
+            cols : 1
+            rows : 7
+
+            Button:
+                id : add_std_btn
+                text: 'Add Students'
+                text_size: self.size
+                halign: 'center'
+                valign: 'middle'
+                on_release:
+                    if root.manager.get_screen("AddRecordWindow").dept_lock_status == "TRUE" and root.manager.get_screen("AddRecordWindow").result_publish_status == "FALSE": \
+                    root.manager.current = 'AddRecordWindow';
+                    if root.manager.get_screen("AddRecordWindow").dept_lock_status == "TRUE" and root.manager.get_screen("AddRecordWindow").result_publish_status == "TRUE": \
+                    root.result_published_popup();
+                    else: \
+                    root.dept_not_locked_popup()
+
+            Button:
+                id: add_dept_btn
+                text: 'Add Departments'
+                text_size: self.size
+                halign: 'center'
+                valign: 'middle'
+                on_release:
+                    if root.manager.get_screen("AddRecordWindow").dept_lock_status == "FALSE": \
+                    root.manager.current = 'AddRecordWindow'; \
+                    root.manager.transition.direction = 'left';
+                    else: \
+                    root.dept_locked_popup()
+
+            Button:
+                text: 'Lock Departments'
+                text_size: self.size
+                halign: 'center'
+                valign: 'middle'
+                on_release:
+                    root.manager.get_screen("ConfirmationWindow").ids.confirm_label.text = "Are you sure you want to\nlock the departments?"
+                    root.lock_btn()
+
+            Button:
+                text: 'Department Choice Status'
+                text_size: self.size
+                halign: 'center'
+                valign: 'middle'
+                on_release:
+                    if root.manager.get_screen("AddRecordWindow").result_publish_status == "FALSE" and root.manager.get_screen("AddRecordWindow").dept_lock_status == "TRUE": \
+                    root.manager.get_screen("ConfirmationWindow").ids.confirm_label.text = f"Department Choice is {root.department_choice_status}!\n" \
+                    f"Do You want to {root.change_choice_cmd} Department Choice?"; \
+                    root.manager.get_screen("ConfirmationWindow").confirm = "dept_choice"; \
+                    root.manager.current = "ConfirmationWindow";
+                    elif root.manager.get_screen("AddRecordWindow").result_publish_status == "TRUE": \
+                    root.manager.get_screen("AdminDash").showPop("Department Choice can not be modified now\nResult Has been published!");
+                    else: \
+                    root.manager.get_screen("AdminDash").showPop("Please add at least 3 departments!")
+
+            Button:
+                text: 'Publish Result'
+                text_size: self.size
+                halign: 'center'
+                valign: 'middle'
+                on_release:
+                    root.result_confirmation()
+
+            Button:
+                text: 'Student Records'
+                text_size: self.size
+                halign: 'center'
+                valign: 'middle'
+                on_release:
+                    root.manager.get_screen("ShowAllStudentsWindow").do_stuffs()
+                    root.manager.current = 'ShowAllStudentsWindow'
+                    root.manager.transition.direction = 'right'
+
+            Button:
+                text: 'Log Out'
+                text_size: self.size
+                halign: 'center'
+                valign: 'middle'
+                on_release:
+                    root.manager.get_screen('ConfirmationWindow').prev_window = 'HomeScreen'
+                    root.manager.get_screen('ConfirmationWindow').back_button()
+                    root.manager.transition.direction = 'right'
+
+
+<AddRecordWindow>:
+    name : 'AddRecordWindow'
+
+    FloatLayout:
+        size_hint : 0.2,0.1
+        Button:
+            text: 'Back'
+            text_size: self.size
+            halign: 'center'
+            valign: 'middle'
+            pos: (root.width - (self.width+20), root.height - (self.height + 20))
+            on_release:
+                root.dept_name_input.text = ''
+                root.seat_cap_input.text = ''
+                root.name_input.text = ''
+                root.marks_input.text = ''
+                root.manager.get_screen('ConfirmationWindow').prev_window = 'AdminDash'
+                root.manager.get_screen('ConfirmationWindow').back_button()
+                root.manager.transition.direction = 'right'
+
+<ShowAllStudentsWindow>:
+    name : 'ShowAllStudentsWindow'
+
+
+    FloatLayout:
+        size_hint : 0.2,0.1
+        Button:
+            text: 'Back'
+            text_size: self.size
+            halign: 'center'
+            valign: 'middle'
+            pos: (root.width - (self.width+20), root.height - (self.height + 20))
+            on_release:
+                root.manager.current = "AdminDash"
+
+<StudentDataWindow>:
+    name: 'StudentDataWindow'
+
+    FloatLayout:
+        size_hint : 0.2,0.1
+        Button:
+            text: 'Back'
+            text_size: self.size
+            halign: 'center'
+            valign: 'middle'
+            pos: (root.width - (self.width+20), root.height - (self.height + 20))
+            on_release:
+                root.manager.current = "ShowAllStudentsWindow"
+
+<StudentDash>:
+    name : 'StudentDash'
+
+    FloatLayout:
+        size_hint : 0.2,0.1
+        Button:
+            text: 'LOG OUT'
+            text_size: self.size
+            halign: 'center'
+            valign: 'middle'
+            pos: (root.width - (self.width+20), root.height - (self.height + 20))
+            on_release:
+                root.log_out()
+
+<ChangeDeptChoiceWindow>:
+    name : 'ChangeDeptChoiceWindow'
