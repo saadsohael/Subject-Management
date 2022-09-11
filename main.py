@@ -40,7 +40,7 @@ class HomeScreen(Screen):
         else:
             self.sign_in_window()
 
-    def sign_up_window(self):
+    def sign_up_window(self):  # <= sign up window opens only the first time for administrator to signing up!
 
         self.box = BoxLayout(orientation='vertical',
                              size_hint=(0.5, 0.8),
@@ -69,7 +69,7 @@ class HomeScreen(Screen):
         self.box.add_widget(self.grd)
         self.add_widget(self.box)
 
-    def sign_in_window(self):
+    def sign_in_window(self):  # <= opens everytime for admin and students to sign up!
 
         self.box = BoxLayout(orientation='vertical',
                              size_hint=(0.5, 0.8),
@@ -115,7 +115,7 @@ class HomeScreen(Screen):
         self.box.add_widget(self.grd)
         self.add_widget(self.box)
 
-    def sign_up_btn(self, instance):
+    def sign_up_btn(self, instance):  # Add admin data to the sqlite3 database
         admin_username = self.adm_username.text
         admin_password = self.adm_password.text
         db = sqlite3.connect('admin_database.db')
@@ -160,7 +160,7 @@ class HomeScreen(Screen):
             except IndexError:
                 self.manager.get_screen("AdminDash").showPop("Wrong Username!")
 
-    def go_to_btn(self, instance):
+    def go_to_btn(self, instance):  # <= to swtich between admin and student login
         if self.change_user_btn.text == "go to admin log in!":
             self.heading.text = 'Admin Login'
             self.change_user_btn.text = "go to student log in!"
@@ -178,7 +178,7 @@ class HomeScreen(Screen):
             self.password.text = ''
 
 
-class ConfirmationWindow(Screen):
+class ConfirmationWindow(Screen):  # all confirmation comes to here...
     def __init__(self, **kwargs):
         super(ConfirmationWindow, self).__init__(**kwargs)
 
