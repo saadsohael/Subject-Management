@@ -3,8 +3,8 @@ WindowManager:
     ConfirmationWindow:
     AdminDash:
     AddRecordWindow:
-    StudentDataWindow:
     ShowAllStudentsWindow:
+    StudentDataWindow:
     StudentDash:
     ChangeDeptChoiceWindow:
 
@@ -50,7 +50,6 @@ WindowManager:
                     halign: 'center'
                     valign: 'middle'
                     on_release:
-                        root.prev_window = 'AdminDash'
                         root.back_button()
 
 <AdminDash>:
@@ -110,6 +109,7 @@ WindowManager:
                     if root.manager.get_screen("AddRecordWindow").result_publish_status == "FALSE" and root.manager.get_screen("AddRecordWindow").dept_lock_status == "TRUE": \
                     root.manager.get_screen("ConfirmationWindow").ids.confirm_label.text = f"Department Choice is {root.department_choice_status}!\n" \
                     f"Do You want to {root.change_choice_cmd} Department Choice?"; \
+                    root.manager.get_screen("ConfirmationWindow").prev_window = "AdminDash"; \
                     root.manager.get_screen("ConfirmationWindow").confirm = "dept_choice"; \
                     root.manager.current = "ConfirmationWindow";
                     elif root.manager.get_screen("AddRecordWindow").result_publish_status == "TRUE": \
@@ -141,8 +141,7 @@ WindowManager:
                 halign: 'center'
                 valign: 'middle'
                 on_release:
-                    root.manager.get_screen('ConfirmationWindow').prev_window = 'HomeScreen'
-                    root.manager.get_screen('ConfirmationWindow').back_button()
+                    root.manager.current = 'HomeScreen'
                     root.manager.transition.direction = 'right'
 
 
@@ -162,8 +161,7 @@ WindowManager:
                 root.seat_cap_input.text = ''
                 root.name_input.text = ''
                 root.marks_input.text = ''
-                root.manager.get_screen('ConfirmationWindow').prev_window = 'AdminDash'
-                root.manager.get_screen('ConfirmationWindow').back_button()
+                root.manager.current = 'AdminDash'
                 root.manager.transition.direction = 'right'
 
 <ShowAllStudentsWindow>:

@@ -158,7 +158,7 @@ class HomeScreen(Screen):
                     self.manager.get_screen("AdminDash").showPop("Wrong Password!")
 
             except IndexError:
-                self.manager.get_screen("AdminDash").showPop("Wrong Username!")
+                self.manager.get_screen("AdminDash").showPop(f"No student named {self.username.text}")
 
     def go_to_btn(self, instance):  # <= to swtich between admin and student login
         if self.change_user_btn.text == "go to admin log in!":
@@ -194,8 +194,7 @@ class ConfirmationWindow(Screen):  # all confirmation comes to here...
             self.manager.get_screen("AddRecordWindow").dept_lock_status = "TRUE"
             self.manager.get_screen("AddRecordWindow").remove_widget(self.manager.get_screen("AddRecordWindow").box)
             self.manager.get_screen("AddRecordWindow").add_student_window()
-            self.prev_window = 'AdminDash'
-            self.back_button()
+            self.manager.current = 'AdminDash'
 
         elif self.confirm == 'dept_choice':
             new_data = 'FALSE' if adm.fetch_admin_data()[0][2] == 'TRUE' else 'TRUE'
@@ -205,17 +204,20 @@ class ConfirmationWindow(Screen):  # all confirmation comes to here...
             self.manager.get_screen(
                 "AdminDash").change_choice_cmd = "Enable" if self.manager.get_screen(
                 "AdminDash").department_choice_status == "Disabled" else "Disable"
-            self.prev_window = 'AdminDash'
-            self.back_button()
+            self.manager.current = 'AdminDash'
 
         elif self.confirm == "publish_result":
             self.manager.get_screen("AdminDash").publish_result()
             self.manager.get_screen("AddRecordWindow").result_publish_status = 'TRUE'
-            self.prev_window = 'AdminDash'
-            self.back_button()
+            self.manager.current = 'AdminDash'
 
         elif self.confirm == 'cancel_admission':
-            pass
+            adm.cancel_student(self.manager.get_screen("StudentDash").student_name)
+            self.manager.get_screen("AdminDash").publish_result()
+            self.manager.current = "HomeScreen"
+            self.manager.transition.direction = 'right'
+            self.manager.get_screen("AdminDash").showPop("You have successfully canceled your admission!")
+
 
 
 # admin panel
@@ -238,6 +240,7 @@ class AdminDash(Screen):
     def dept_lock_btn(self):  # <= check and lock departments and if not locked show pop up!
         departments = [v[0] for v in adm.fetch_departments()[0]]
         if adm.fetch_admin_data()[0][3] == "FALSE" and len(departments) >= 3:
+            self.manager.get_screen("ConfirmationWindow").prev_window = "AdminDash"
             self.manager.get_screen("ConfirmationWindow").confirm = "lock_dept"
             self.manager.current = "ConfirmationWindow"
         else:
@@ -263,6 +266,7 @@ class AdminDash(Screen):
         if adm.fetch_admin_data()[0][4] == "FALSE" and len([v[0] for v in adm.fetch_student()]) >= 3:
             self.manager.get_screen("ConfirmationWindow").ids.confirm_label.text = "Are you sure you want to\n" \
                                                                                    "Publish the Result?"
+            self.manager.get_screen("ConfirmationWindow").prev_window = "AdminDash"
             self.manager.get_screen("ConfirmationWindow").confirm = "publish_result"
             self.manager.current = "ConfirmationWindow"
         elif adm.fetch_admin_data()[0][4] == "TRUE":
@@ -519,6 +523,7 @@ class StudentDash(Screen):
         # This section is under top grid layout
         if self.manager.get_screen("ChangeDeptChoiceWindow").student_name == "":
             self.student_name = self.manager.get_screen("HomeScreen").username.text
+            print(self.student_name)
         else:
             self.student_name = self.manager.get_screen("ChangeDeptChoiceWindow").student_name
         self.box = BoxLayout(orientation="vertical",
@@ -567,12 +572,12 @@ class StudentDash(Screen):
         # this section is under bottom grid layout
         change_btn = Button(text='CHANGE CHOICE LIST')
         change_btn.bind(on_release=self.change_choice)
-        back_btn = Button(text='CANCEL ADMISSION')
-        back_btn.bind(on_release=self.cancel_adm)
+        cancel_btn = Button(text='CANCEL ADMISSION')
+        cancel_btn.bind(on_release=self.cancel_adm)
 
         # adding widgets to bottom grid layout
         btm_grd.add_widget(change_btn)
-        btm_grd.add_widget(back_btn)
+        btm_grd.add_widget(cancel_btn)
 
         # adding all layouts to the parent box layout
         self.box.add_widget(top_grd)
@@ -605,8 +610,12 @@ class StudentDash(Screen):
                     "Result Has Been Published!\nYou cannot change department choice anymore!")
 
     def cancel_adm(self, instance):
-        self.manager.get_screen("ConfirmationWindow").confirm = 'cancel_admission'
-        self.manager.current = "ConfirmationWindow"
+        if self.manager.get_screen("AddRecordWindow").result_publish_status == "TRUE":
+            self.manager.get_screen("ConfirmationWindow").prev_window = 'StudentDash'
+            self.manager.get_screen("ConfirmationWindow").confirm = 'cancel_admission'
+            self.manager.current = "ConfirmationWindow"
+        else:
+            self.manager.get_screen("AdminDash").showPop("Sorry! Result has not been published yet.")
 
 
 class ChangeDeptChoiceWindow(Screen):
