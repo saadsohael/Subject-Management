@@ -231,11 +231,11 @@ class AdminDash(Screen):
             self.department_choice_status = "Disabled"
             self.change_choice_cmd = "Enable"
 
-    def showPop(self, text):
+    def showPop(self, text):  # calls the Popup()
         return Popup(content=Label(text=text), size_hint=(dp(.4), dp(.15)),
                      pos_hint={'x': 0.095, 'top': .9}).open()
 
-    def lock_btn(self):
+    def dept_lock_btn(self):  # <= check and lock departments and if not locked show pop up!
         departments = [v[0] for v in adm.fetch_departments()[0]]
         if adm.fetch_admin_data()[0][3] == "FALSE" and len(departments) >= 3:
             self.manager.get_screen("ConfirmationWindow").confirm = "lock_dept"
@@ -272,11 +272,16 @@ class AdminDash(Screen):
 
     def publish_result(self):
         for v in adm.get_merit():
+            # selects the choices from student choices (not the primary one's from admin data)
             choice = std.fetch_dept_choice(v[0])
             for i in choice:
+                # checks if the department has seats available else move on to next choice
                 if adm.query_left_seat(i) > 0:
+                    # as there is left seat update obtained department in the admin panel to student data
                     adm.update_obtained_dept(v[0], i)
+                    # also update obtained department in the student panel
                     std.update_dept(i, v[0])
+                    #update left seat : decrease number of seats by 1 in current department
                     adm.update_left_seat(i)
                     adm.update_admin_data('admin_data', 'result_published', 'TRUE')
                     break
