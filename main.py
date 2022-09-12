@@ -152,8 +152,6 @@ class HomeScreen(Screen):
                     self.manager.get_screen('StudentDash').do_stuffs()
                     self.manager.current = 'StudentDash'
                     self.manager.transition.direction = 'left'
-                    self.username.text = ''
-                    self.password.text = ''
                 else:
                     self.manager.get_screen("AdminDash").showPop("Wrong Password!")
 
@@ -214,6 +212,8 @@ class ConfirmationWindow(Screen):  # all confirmation comes to here...
         elif self.confirm == 'cancel_admission':
             adm.cancel_student(self.manager.get_screen("StudentDash").student_name)
             self.manager.get_screen("AdminDash").publish_result()
+            self.manager.get_screen('HomeScreen').username.text = ''
+            self.manager.get_screen('HomeScreen').password.text = ''
             self.manager.current = "HomeScreen"
             self.manager.transition.direction = 'right'
             self.manager.get_screen("AdminDash").showPop("You have successfully canceled your admission!")
@@ -521,11 +521,7 @@ class StudentDash(Screen):
 
     def do_stuffs(self):
         # This section is under top grid layout
-        if self.manager.get_screen("ChangeDeptChoiceWindow").student_name == "":
-            self.student_name = self.manager.get_screen("HomeScreen").username.text
-            print(self.student_name)
-        else:
-            self.student_name = self.manager.get_screen("ChangeDeptChoiceWindow").student_name
+        self.student_name = self.manager.get_screen("HomeScreen").username.text
         self.box = BoxLayout(orientation="vertical",
                              spacing=50,
                              padding=20,
@@ -586,6 +582,8 @@ class StudentDash(Screen):
         self.add_widget(self.box)
 
     def log_out(self):
+        self.manager.get_screen('HomeScreen').username.text = ''
+        self.manager.get_screen('HomeScreen').password.text = ''
         self.manager.get_screen('ConfirmationWindow').prev_window = 'HomeScreen'
         self.manager.get_screen('ConfirmationWindow').back_button()
         self.manager.transition.direction = 'right'
@@ -629,7 +627,7 @@ class ChangeDeptChoiceWindow(Screen):
         self.student_name = ''
 
     def do_stuffs(self):
-        self.student_name = self.manager.get_screen("StudentDash").student_name
+        self.student_name = self.manager.get_screen("HomeScreen").username.text
         box = BoxLayout(orientation='vertical',
                         size_hint=(0.5, 0.8),
                         pos_hint={'x': (0.5 - 0.25), 'y': 0.12})

@@ -141,6 +141,8 @@ WindowManager:
                 halign: 'center'
                 valign: 'middle'
                 on_release:
+                    root.manager.get_screen('HomeScreen').username.text = ''
+                    root.manager.get_screen('HomeScreen').password.text = ''
                     root.manager.current = 'HomeScreen'
                     root.manager.transition.direction = 'right'
 
@@ -177,6 +179,7 @@ WindowManager:
             valign: 'middle'
             pos: (root.width - (self.width+20), root.height - (self.height + 20))
             on_release:
+                root.remove_widget(root.box)
                 root.manager.current = "AdminDash"
 
 <StudentDataWindow>:
